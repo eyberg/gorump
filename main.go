@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/deferpanic/deferclient/deferstats"
 	"net/http"
 	"time"
 )
@@ -24,9 +25,13 @@ func panicHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/fast", fastHandler)
-	http.HandleFunc("/slow", slowHandler)
-	http.HandleFunc("/panic", panicHandler)
+	dps := deferstats.NewClient("v00L0K6CdKjE4QwX5DL1iiODxovAHUfo")
+
+	go dps.CaptureStats()
+
+	http.HandleFunc("/fast", dps.HTTPHandlerFunc(fastHandler))
+	http.HandleFunc("/slow", dps.HTTPHandlerFunc(slowHandler))
+	http.HandleFunc("/panic", dps.HTTPHandlerFunc(panicHandler))
 
 	http.ListenAndServe(":3000", nil)
 }
